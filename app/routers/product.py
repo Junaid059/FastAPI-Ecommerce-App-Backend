@@ -15,7 +15,7 @@ def createProduct(id: int, product: schemas.ProductCreate, db: Session = Depends
     return product
 
 @router.get("/getProducts/{category}",response_model = schemas.ProductCreate)
-def getProducts(category:schemas.ProductCreate,db: Session = Depends(get_db)):
+def getProducts(category:str,db: Session = Depends(get_db)):
     products = db.query(models.Product).filter(models.Product.category == category).all()
     db.commit()
     return products

@@ -10,7 +10,7 @@ class UserCreate(UserBase):
     pass
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ProductBase(BaseModel):
     name: str
@@ -23,7 +23,7 @@ class ProductCreate(ProductBase):
     pass
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class OrderCreate(BaseModel):
     user_id: int
@@ -38,7 +38,7 @@ class OrderRead(OrderCreate):
 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Category(BaseModel):
@@ -51,7 +51,7 @@ class CategoryRead(Category):
     id: int    
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RatingCreate(BaseModel):
     product_id: int
@@ -65,7 +65,7 @@ class RatingRead(BaseModel):
     rating: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CommentCreate(BaseModel):
     product_id: int 
@@ -79,7 +79,7 @@ class CommentRead(BaseModel):
     content: str
 
     class Config:
-      orm_mode = True
+      from_attributes = True
 
 
 
