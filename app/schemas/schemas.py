@@ -81,8 +81,39 @@ class CommentRead(BaseModel):
     class Config:
       from_attributes = True
 
+class CartCreate(BaseModel):
+    user_id: int
+    product_id: int
+    quantity: int
+
+class CartRead(BaseModel):
+    id: int
+    user_id: int
+    product_id: int
+    quantity: int
+
+    class Config:
+        from_attributes = True          
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str    
+    
+class TokenData(BaseModel):
+    id: int | None = None
+    role: str | None = None
 
 
+    class Config:
+        from_attributes = True
 
+class WishlistCreate(BaseModel):
+    product_id:int
 
-        
+class WishListRead(BaseModel):
+    id:int
+    user_id:int
+    product_id:int
+
+    class config:
+        from_attributes = True            

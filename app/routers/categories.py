@@ -3,14 +3,21 @@ from ..schemas import schemas
 from ..models import models  
 from ..database import get_db
 from sqlalchemy.orm import Session
-
+from .Oauth2 import getCurrentUser
 
 
 router = APIRouter()
 
+def userRole(user = Depends(getCurrentUser)):
+    if user.role !="admin":
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="admin access required")
+    return user
+
 
 @router.post("/createCategory",response_model = schemas.CategoryRead)
-def createCategory(category: schemas.CategoryCreate,db: Session = Depends(get_db)):
+def createCategory(category: schemas.CategoryCreate,db: Session = Depends(get_db),user = Depends(userRole)):
+    if user.role != "admin":
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="admin access required")
     category = models.Category(name = category.name)
     db.add(category)
     db.commit()
@@ -32,7 +39,9 @@ def getCategory(id: int, category: schemas.CategoryRead, db:Session = Depends(ge
     return category
 
 @router.put("/updateCategory/{category_id}",response_model = schemas.CategoryRead)
-def updateCategory(id:int,category_update: schemas.CategoryRead, db: Session = Depends(get_db)):
+def updateCategory(id:int,category_update: schemas.CategoryRead, db: Session = Depends(get_db),user = Depends(userRole)):
+    if user.role != "admin":
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="admin access required")
     category = db.query(models.Category).filter(models.Category.id == id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
@@ -43,7 +52,9 @@ def updateCategory(id:int,category_update: schemas.CategoryRead, db: Session = D
 
 
 @router.delete("/deleteCategory/{category_id}",response_model = schemas.CategoryRead)
-def deleteCategory(id: int, db: Session = Depends(get_db)):
+def deleteCategory(id: int, db: Session = Depends(get_db),user = Depends(userRole)):
+    if user.role != "admin":
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="admin access required")
     category = db.query(models.Category).filter(models.Category.id == id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")

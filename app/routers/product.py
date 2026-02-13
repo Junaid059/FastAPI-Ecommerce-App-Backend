@@ -3,11 +3,19 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import models
 from app.schemas import schemas
+from .Oauth2 import getCurrentUser
 
 router = APIRouter()
 
+def userRole(user = Depends(getCurrentUser)):
+    if user.role not in ("seller","admin","customer"):
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="access required")
+    return user
+
 @router.post("/createProduct",response_model = schemas.ProductCreate)
-def createProduct(id: int, product: schemas.ProductCreate, db: Session = Depends(get_db)):
+def createProduct(id: int, product: schemas.ProductCreate, db: Session = Depends(get_db),user =Depends(userRole) ):
+    if user.role != "seller" and user.role != "admin":
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Seller or admin access required")
     product = models.Product(name = product.name, price= product.price, description = product.description, image_url = product.image_url, category=product.category)
     db.add(product)
     db.commit()
@@ -16,7 +24,7 @@ def createProduct(id: int, product: schemas.ProductCreate, db: Session = Depends
 
 @router.get("/getProducts/{category}",response_model = schemas.ProductCreate)
 def getProducts(category:str,db: Session = Depends(get_db)):
-    products = db.query(models.Product).filter(models.Product.category == category).all()
+    products = db.query(models.Product).filter(models.Product.category == category).limit(10).all()
     db.commit()
     return products
 
@@ -29,7 +37,9 @@ def getProduct(id: int,db: Session = Depends(get_db)):
     return product
 
 @router.put("/updateProduct/{product_id}",response_model = schemas.ProductCreate)
-def updateProduct(id:int, product_update: schemas.ProductCreate,db: Session = Depends(get_db)):
+def updateProduct(id:int, product_update: schemas.ProductCreate,db: Session = Depends(get_db),user = Depends(userRole)):
+    if user.role != "seller" and user.role != "admin":
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Seller or admin access required")
     product = db.query(models.Product).filter(models.Product.id == id).first()
     if not product:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="Product not found")
@@ -43,7 +53,9 @@ def updateProduct(id:int, product_update: schemas.ProductCreate,db: Session = De
     return product
 
 @router.delete("/deleteProduct/{product_id}",response_model = schemas.ProductCreate)
-def deleteProduct(id: int, db: Session = Depends(get_db)):
+def deleteProduct(id: int, db: Session = Depends(get_db),user = Depends(userRole)):
+    if user.role != "seller" and user.role != "admin":
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Seller or admin access required")
     product = db.query(models.Product).filter(models.Product.id == id).first()
     if not product:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="Product not found")

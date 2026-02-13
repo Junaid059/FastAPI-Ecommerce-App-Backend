@@ -10,3 +10,5 @@ asyncpg-stubs
 alembic
 psycopg2-binary
 dotenv
+pyjwt
+pwdlib

@@ -10,11 +10,13 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    role = Column(String, default='user')
+    role = Column(String, default='customer')
 
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
     ratings = relationship("Rating", back_populates="user", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
+    cart_items = relationship("Cart", back_populates="user", cascade="all, delete-orphan")
+    wishlist = relationship("Wishlist", back_populates="user", cascade="all, delete-orphan")
     
 class Product(Base):
     __tablename__ = "products"
@@ -28,6 +30,9 @@ class Product(Base):
     orders = relationship("Order",lazy="joined", innerjoin=True,back_populates="product", cascade="all, delete-orphan")
     ratings = relationship("Rating",lazy="joined", innerjoin=True,back_populates="product", cascade="all, delete-orphan")
     comments = relationship("Comment",lazy="joined", innerjoin=True,back_populates="product", cascade="all, delete-orphan")
+    cart_items = relationship("Cart",lazy="joined", innerjoin=True,back_populates="product", cascade="all, delete-orphan")
+    wishlist = relationship("Wishlist",lazy="joined", innerjoin=True,back_populates="product", cascade="all, delete-orphan")
+
 
 class Category(Base):
     __tablename__ = "categories"
@@ -64,3 +69,23 @@ class Order(Base):
 
     user = relationship("User",lazy="joined", innerjoin=True,back_populates="orders")
     product = relationship("Product",lazy="joined", innerjoin=True,back_populates="orders")
+
+
+class Cart(Base):
+    __tablename__ = "cart"
+    id = Column(Integer,primary_key = True, nullable=False, autoincrement=True)
+    user_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"), nullable=False)
+    product_id = Column(Integer,ForeignKey("products.id",ondelete="CASCADE"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+
+    user = relationship("User",lazy="joined", innerjoin=True, back_populates="cart_items")
+    product = relationship("Product",lazy="joined", innerjoin=True, back_populates="cart_items")
+
+class Wishlist(Base):
+     __tablename__ = "wishlist"
+     id = Column(Integer,primary_key=True,nullabale=False,autoincrement = True)
+     user_id = Column(Integer,ForeignKey("users.id",ondelete = "CASCADE"),nullable=False)
+     product_id = Column(Integer,ForeignKey("products.id",ondelete = "CASCADE"),nullable=False)
+
+     user = relationship("User",lazy="joined", innerjoin=True, back_populates="wishlist")
+     product = relationship("Product",lazy="joined", innerjoin=True,back_populates="wishlist")
