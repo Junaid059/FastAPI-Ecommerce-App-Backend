@@ -10,6 +10,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
+    refresh_token = Column(String, nullable=True)
     role = Column(String, default='customer')
 
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
@@ -26,6 +27,7 @@ class Product(Base):
     description = Column(String, nullable = True)
     image_url = Column(String, nullable = True)
     category= Column(Integer,ForeignKey("categories.id",ondelete="SET NULL"), nullable=True)
+    stock = Column(Integer,nullable=False)
 
     orders = relationship("Order",lazy="joined", innerjoin=True,back_populates="product", cascade="all, delete-orphan")
     ratings = relationship("Rating",lazy="joined", innerjoin=True,back_populates="product", cascade="all, delete-orphan")
@@ -66,6 +68,7 @@ class Order(Base):
     product_id = Column(Integer,ForeignKey("products.id",ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"), nullable=False)
     quantity = Column(Integer, nullable=False)
+    address = Column(String, nullable=False)
 
     user = relationship("User",lazy="joined", innerjoin=True,back_populates="orders")
     product = relationship("Product",lazy="joined", innerjoin=True,back_populates="orders")

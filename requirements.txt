@@ -12,3 +12,6 @@ psycopg2-binary
 dotenv
 pyjwt
 pwdlib
+celery
+redis
+fastapi-mail

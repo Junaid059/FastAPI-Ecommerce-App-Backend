@@ -16,11 +16,24 @@ def userRole(user = Depends(getCurrentUser)):
 def createOrder(order: schemas.OrderCreate, db: Session = Depends(get_db),user = Depends(userRole)):
     if user.role != "customer":
         raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Customer access required")
-    order = models.Order(user_id = order.user_id, product_id = order.product_id, quantity = order.quantity)
-    db.add(order)
+    # Fetch the product from the database
+    product = db.query(models.Product).filter(models.Product.id == order.product_id).first()
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    # Use the instance attribute for stock check and update
+    current_stock = product.__dict__.get('stock')
+    if current_stock is None:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Product stock not set")
+    if current_stock < order.quantity:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough stock available")
+    # Create the order
+    new_order = models.Order(user_id=order.user_id, product_id=order.product_id, quantity=order.quantity, address=order.address)
+    # Update the product stock (instance attribute)
+    product.__dict__['stock'] = current_stock - order.quantity
+    db.add(new_order)
     db.commit()
-    db.refresh(order)
-    return order
+    db.refresh(new_order)
+    return new_order
 
 @router.get("/getOrders/{user_id}",response_model = schemas.OrderRead)
 def getOrders(user_id: int, offset: int = 0, db: Session = Depends(get_db),user = Depends(userRole)):
@@ -50,6 +63,7 @@ def updateOrder(id: int, order_update: schemas.OrderCreate, db: Session = Depend
     setattr(order, "user_id", order_update.user_id)
     setattr(order, "product_id", order_update.product_id)
     setattr(order, "quantity", order_update.quantity)
+    setattr(order,"address",order_update.address)
     db.commit()
     db.refresh(order)
     return order

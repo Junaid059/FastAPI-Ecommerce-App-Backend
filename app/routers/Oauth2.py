@@ -32,6 +32,14 @@ def create_token(data: dict):
     encode_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encode_jwt
 
+def create_refresh_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow()+ timedelta(days=7)
+    to_encode.update({"exp":expire})
+    assert SECRET_KEY is not None and ALGORITHM is not None
+    encode_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encode_jwt
+
 def verifyToken(token: str, credentials_exception):
     try:
         assert SECRET_KEY is not None and ALGORITHM is not None 

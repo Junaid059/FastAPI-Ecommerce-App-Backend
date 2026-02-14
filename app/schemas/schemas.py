@@ -18,6 +18,7 @@ class ProductBase(BaseModel):
     price: int
     image_url: str
     category: str
+    stock: int
 
 class ProductCreate(ProductBase):
     pass
@@ -29,13 +30,15 @@ class OrderCreate(BaseModel):
     user_id: int
     product_id: int
     quantity: int
+    address: str
+    
 
 class OrderRead(OrderCreate):
     order_id: int
     user_id: int
     product_id: int
     quantity: int
-
+    address: str
 
     class Config:
         from_attributes = True
@@ -94,10 +97,6 @@ class CartRead(BaseModel):
 
     class Config:
         from_attributes = True          
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str    
     
 class TokenData(BaseModel):
     id: int | None = None
@@ -117,3 +116,9 @@ class WishListRead(BaseModel):
 
     class config:
         from_attributes = True            
+
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str | None = None
+    token_type: str

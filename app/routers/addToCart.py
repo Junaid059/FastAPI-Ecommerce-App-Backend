@@ -16,44 +16,31 @@ def UserRole(user = Depends(getCurrentUser)):
 def addtocart(cart: schemas.CartCreate, db: Session = Depends(get_db),user = Depends(UserRole)):
     if user.role != "customer":
         raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Customer access required")
-    db_cart = db.query(models.Cart).filter(models.Cart.user_id == cart.user_id, models.Cart.product_id == cart.product_id,models.Cart.quantity ==cart.quantity).first()
-
+    db_cart = db.query(models.Cart).filter(models.Cart.user_id == user.id, models.Cart.product_id == cart.product_id).first()
     if db_cart:
         raise HTTPException(status_code = status.HTTP_400_BAD_REQUEST, detail="Item already in cart")
-    
-    cart_item = models.Cart(user_id = cart.user_id, product_id = cart.product_id,quantity = cart.quantity)
+    cart_item = models.Cart(user_id = user.id, product_id = cart.product_id, quantity = cart.quantity)
     db.add(cart_item)
     db.commit()
     db.refresh(cart_item)
-
     return cart_item
 
-@router.get("getCart/{cart_id}",response_model = schemas.CartRead)
-def getCart(id:int, db:Session = Depends(get_db),user = Depends(UserRole)):
-    if user.role != "customer" and user.role != "admin":
-        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Customer access required")
-    cart_item = db.query(models.Cart).filter(models.Cart.id == id).first()
-    if cart_item is None:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="Cart item not found")
-    db.commit()
-    return cart_item
 
-@router.get("/getAllCartItems",response_model = schemas.CartRead)
+@router.get("/getAllCartItems",response_model = list[schemas.CartRead])
 def getallCartItem(db: Session = Depends(get_db),user = Depends(UserRole)):
     if user.role != "customer" and user.role != "admin":
         raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Customer access required")
-    cart_items = db.query(models.Cart).limit(10).all()
-    db.commit()
+    cart_items = db.query(models.Cart).filter(models.Cart.user_id == user.id).all()
     return cart_items
 
 @router.put("/updateCart",response_model = schemas.CartRead)
 def updateCart(id: int, cart_update: schemas.CartCreate,db: Session=Depends(get_db),user = Depends(UserRole)):
     if user.role != "customer" and user.role != "admin":
-        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Customer access required")
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="access required")
     cart_item = db.query(models.Cart).filter(models.Cart.id == id).first()
     if not cart_item:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="Cart item not found")
-    setattr(cart_item, "product_id", cart_update.user_id)
+    setattr(cart_item, "product_id", cart_update.product_id)
     setattr(cart_item,"quantity", cart_update.quantity)
     db.commit()
     db.refresh(cart_item)
@@ -62,7 +49,7 @@ def updateCart(id: int, cart_update: schemas.CartCreate,db: Session=Depends(get_
 @router.delete("/deleteCart/{cart_id}",response_model = schemas.CartRead)
 def deleteCart(id: int,db: Session = Depends(get_db),user = Depends(UserRole)):
     if user.role != "customer" and user.role != "admin":
-        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="Customer access required")
+        raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail="access required")
     cart_item = db.query(models.Cart).filter(models.Cart.id == id).first()
     if not cart_item:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail="Cart item not found")
