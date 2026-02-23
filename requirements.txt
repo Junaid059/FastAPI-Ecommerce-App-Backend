@@ -9,9 +9,11 @@ asyncpg
 asyncpg-stubs
 alembic
 psycopg2-binary
-dotenv
+python-dotenv
 pyjwt
 pwdlib
 celery
 redis
 fastapi-mail
+stripe
+aiosmtplib

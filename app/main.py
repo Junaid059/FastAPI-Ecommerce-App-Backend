@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from .models import models
 from .database import engine
-from .routers import users, product, categories, order, comment, ratings, search, addToCart,wishlists
+from .routers import users, product, categories, order, comment, ratings, search, addToCart, wishlists, checkout
 
-  
+app = FastAPI(
+    title="E-Commerce API",
+    description="Advanced e-commerce platform with Stripe payment integration",
+    version="1.0.0"
+)
 
-
-app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
 
 app.include_router(users.router)
@@ -18,5 +20,6 @@ app.include_router(ratings.router)
 app.include_router(search.router)
 app.include_router(addToCart.router)
 app.include_router(wishlists.router)
+app.include_router(checkout.router)
 
 

@@ -122,3 +122,36 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str | None = None
     token_type: str
+
+class CheckoutSessionCreate(BaseModel):
+    success_url: str
+    cancel_url: str
+    address: str
+
+class CheckoutSessionResponse(BaseModel):
+    session_id: str
+    client_secret: str | None = None
+    url: str | None = None
+
+    class Config:
+        from_attributes = True
+
+class PaymentSuccessResponse(BaseModel):
+    message: str
+    orders_count: int
+    total_amount: int
+
+    class Config:
+        from_attributes = True
+
+class ProductSuggestionResponse(BaseModel):
+    id: int
+    name: str
+    description: str
+    price: int
+    image_url: str
+    category: int
+    stock: int
+
+    class Config:
+        from_attributes = True

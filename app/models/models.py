@@ -69,6 +69,9 @@ class Order(Base):
     user_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"), nullable=False)
     quantity = Column(Integer, nullable=False)
     address = Column(String, nullable=False)
+    stripe_session_id = Column(String, nullable=True, index=True)
+    payment_status = Column(String, default="pending")
+    total_amount = Column(Integer, nullable=True)
 
     user = relationship("User",lazy="joined", innerjoin=True,back_populates="orders")
     product = relationship("Product",lazy="joined", innerjoin=True,back_populates="orders")
